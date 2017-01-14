@@ -18,6 +18,13 @@ class UserModelTestCase(BaseTestCase):
         with self.assertRaises(AttributeError):
             mike_password = mike.password
 
+    def test_generates_password_hash(self):
+        """
+        Given a password, the User model should create a hashed password
+        """
+        alla = User(password='my password')
+        self.assertIsNotNone(alla.password_hash)
+
 
 if __name__ == '__main__':
     unittest.main()
