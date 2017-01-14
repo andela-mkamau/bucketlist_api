@@ -1,0 +1,15 @@
+.idea/
+__pycache__/
+*$py.class
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+*,cover
+
+# Flask stuff:
+instance/
+.webassets-cache
