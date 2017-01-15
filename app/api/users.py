@@ -4,9 +4,11 @@ from flask import request, jsonify, abort
 from app.api import api
 from app import db
 from app.models import User
+from app.decorators import json
 
 
 @api.route('/auth/register', methods=['POST'])
+@json
 def register_user():
     """
     Registers a new User with data from the POST request
@@ -14,4 +16,4 @@ def register_user():
     user = User().from_json(request.json)
     db.session.add(user)
     db.session.commit()
-    return jsonify(user.to_json()), 201
+    return user, 201
