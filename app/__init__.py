@@ -22,5 +22,9 @@ def create_app(config_name):
 
     db.init_app(app)
 
+    # register api blueprint
+    from app import api as api_blueprint
+    app.register_blueprint(api_blueprint.api, url_prefix='/api')
+
     return app
 

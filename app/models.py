@@ -1,6 +1,9 @@
 import datetime
-from app import db
+
 from werkzeug.security import generate_password_hash, check_password_hash
+
+from app import db
+from app.errors import ValidationError
 
 
 class User(db.Model):
@@ -27,6 +30,28 @@ class User(db.Model):
         return {
             'username': self.username
         }
+
+    def from_json(self, json):
+        """
+        Creates a User object using parameters from the json data
+
+        :param json: Parameters, in JSON Format, to create User object
+        :return: an instance of User object
+        """
+        try:
+            self.username = json['username']
+            self.password = json['password']
+
+            if not json['username']:
+                raise ValidationError("username cannot be empty")
+            if not json['password']:
+                raise ValidationError("password cannot be empty")
+
+            if User.query.filter_by(username=self.username).first() is not None:
+                raise ValidationError("username is taken")
+        except KeyError as e:
+            raise ValidationError("you must provide both username and password")
+        return self
 
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
