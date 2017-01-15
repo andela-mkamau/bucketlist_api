@@ -3,6 +3,7 @@ from flask_migrate import Migrate, MigrateCommand
 from ptpython.ipython import embed
 
 from app import db, create_app
+from app.models import User, Item, Bucketlist
 
 app = create_app('default')
 manager = Manager(app)
@@ -24,7 +25,7 @@ class PtShell(Shell):
     """
     def run(self, **kwargs):
         context = self.get_context()
-        context.update(db=db)
+        context.update(db=db, User=User, Item=Item, Bucketlist=Bucketlist)
         embed(user_ns=context)
 
 
