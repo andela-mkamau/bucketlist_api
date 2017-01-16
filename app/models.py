@@ -1,5 +1,6 @@
 import datetime
 
+from flask import url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db
@@ -76,6 +77,33 @@ class Bucketlist(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     items = db.relationship('Item', backref='bucketlist', lazy='dynamic',
                             cascade='all, delete-orphan')
+
+    def from_json(self, json):
+        if not json:
+            raise ValidationError("invalid request")
+        try:
+            self.name = json['name']
+            self.user_id = json['user_id']
+
+            if not self.name:
+                raise ValidationError('bucketlist name cannot be empty')
+            if not self.name or not isinstance(self.user_id, int):
+                raise ValidationError('user_id is invalid')
+
+            if 'description' in json and json['description']:
+                self.description = json['description']
+        except KeyError:
+            raise ValidationError('name and user_id must both be provided')
+        return self
+
+    def get_url(self):
+        return url_for('api.get_bucketlist', bucketlist_id=self.id,
+                       _external=True)
+
+    def to_json(self):
+        return {
+            'name': self.name
+        }
 
     def __repr__(self):
         return "Bucketlist: {}".format(self.name)

@@ -22,5 +22,5 @@ def verify_password(username, password):
 
 
 @auth.error_handler
-def unauthorised_error(e):
+def unauthorised_error():
     return unauthorized('you must authenticate to access API')

@@ -1,6 +1,8 @@
 import functools
 
-from flask import jsonify
+from app.errors import unauthorized, not_found
+from flask import jsonify, Response, abort
+
 
 
 def json(func):
@@ -26,6 +28,9 @@ def json(func):
         if isinstance(status_or_headers, (dict, list)):
             # these are headers, NOT status codes
             headers, status_or_headers = status_or_headers, None
+        if isinstance(response, Response):
+            if response.status_code == 401:
+                return unauthorized('you must authenticate to  access API')
         if not isinstance(response, dict):
             response = response.to_json()
         response = jsonify(response)

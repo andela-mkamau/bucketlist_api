@@ -37,14 +37,14 @@ class TestClient:
 
         return rv, json.loads(rv.data.decode('utf-8'))
 
-    def get(self, url, auth=False, headers={}):
+    def get(self, url, headers={}, auth=False):
         return self.send(url, 'GET', headers=headers, auth=auth)
 
-    def post(self, url, data, auth=False, headers={}):
+    def post(self, url, data, headers={}, auth=False):
         return self.send(url, 'POST', data, headers=headers, auth=auth)
 
-    def put(self, url, data, auth=False, headers={}):
+    def put(self, url, data, headers={}, auth=False):
         return self.send(url, 'PUT', data, headers=headers, auth=auth)
 
-    def delete(self, url, auth=False, headers={}):
+    def delete(self, url, headers={}, auth=False):
         return self.send(url, 'DELETE', headers=headers, auth=auth)
