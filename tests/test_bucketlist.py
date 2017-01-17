@@ -44,3 +44,11 @@ class BucketListAPITestCase(BaseTestCase):
                                          }, auth=True)
         self.assertEqual(response.status_code, 200)
         self.assertIsNotNone(response.headers['Location'])
+
+    def test_deletes_bucketlist(self):
+        """
+        Should be able to delete an existing Bucketlist
+        """
+        response, json = self.client.delete('/api/bucketlists/1', auth=True)
+        self.assertEqual(response.status_code, 200)
+
