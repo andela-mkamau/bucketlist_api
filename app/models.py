@@ -96,6 +96,17 @@ class Bucketlist(db.Model):
             raise ValidationError('name and user_id must both be provided')
         return self
 
+    def update_from_json(self, json):
+        if not json:
+            raise ValidationError('invalid request')
+        elif 'name' in json and json['name']:
+            self.name = json['name']
+        elif 'description' in json and json['description']:
+            self.description = json['description']
+        else:
+            raise ValidationError('invalid request')
+        return self
+
     def get_url(self):
         return url_for('api.get_bucketlist', bucketlist_id=self.id,
                        _external=True)

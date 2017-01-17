@@ -22,3 +22,14 @@ def create_bucketlist():
     db.session.add(bucketlist)
     db.session.commit()
     return {}, 201, {'Location': bucketlist.get_url()}
+
+
+@api.route('/bucketlists/<int:bucketlist_id>', methods=['PUT'])
+@json
+@auth.login_required
+def edit_bucketlist(bucketlist_id):
+    bucketlist = Bucketlist.query.get_or_404(bucketlist_id)
+    bucketlist = bucketlist.update_from_json(request.json)
+    db.session.add(bucketlist)
+    db.session.commit()
+    return {}, 200, {'Location': bucketlist.get_url()}
