@@ -32,3 +32,15 @@ class BucketListAPITestCase(BaseTestCase):
                                                 'user_id': 1}, auth=True)
         self.assertEqual(response.status_code, 201)
         self.assertIsNotNone(response.headers.get('Location'))
+
+    def test_edits_bucketlist(self):
+        """
+        Should be able to edit an existing Bucketlist
+        """
+        response, json = self.client.put('/api/bucketlists/1',
+                                         data={
+                                             'name': 'todo list edited',
+                                             'description': 'blist description'
+                                         }, auth=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNotNone(response.headers['Location'])
