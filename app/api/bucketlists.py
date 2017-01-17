@@ -33,3 +33,19 @@ def edit_bucketlist(bucketlist_id):
     db.session.add(bucketlist)
     db.session.commit()
     return {}, 200, {'Location': bucketlist.get_url()}
+
+
+@api.route('/bucketlists/<int:bucketlist_id>', methods=['DELETE'])
+@json
+@auth.login_required
+def delete_bucketlist(bucketlist_id):
+    """
+    Deletes an existing Bucketlist with the given `bucketlist_id`
+
+    :param bucketlist_id: primary key id of the Bucketlist
+    :return: Response object with status code 200 if successful, else error
+    """
+    bucketlist = Bucketlist.query.get_or_404(bucketlist_id)
+    db.session.delete(bucketlist)
+    db.session.commit()
+    return {}, 200
