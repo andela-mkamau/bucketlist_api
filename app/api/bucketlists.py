@@ -92,3 +92,18 @@ def edit_item(bucketlist_id, item_id):
     db.session.add(item)
     db.session.commit()
     return {}, 200, {'Location': item.get_url()}
+
+@api.route('/bucketlists/<int:bucketlist_id>/items/<int:item_id>',
+           methods=['DELETE'])
+@json
+@auth.login_required
+def delete_item(bucketlist_id, item_id):
+    """
+    Deletes an existing Item in a Bucketlist
+
+    :return: Response with status code 200 if successful, else JSON error
+    """
+    item = Item.query.filter_by(id=item_id, bucketlist_id=bucketlist_id).first()
+    db.session.delete(item)
+    db.session.commit()
+    return {}, 200
