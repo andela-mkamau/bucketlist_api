@@ -51,7 +51,8 @@ class User(db.Model):
             if User.query.filter_by(username=self.username).first() is not None:
                 raise ValidationError("username is taken")
         except KeyError as e:
-            raise ValidationError("you must provide both username and password")
+            raise ValidationError(
+                "you must provide both username and password")
         return self
 
     def verify_password(self, password):
@@ -144,13 +145,42 @@ class Item(db.Model):
     def to_json(self):
         return {
             'id': self.id,
-            'name':self.name,
+            'name': self.name,
             'date_created': self.date_created,
             'date_modified': self.date_modified,
             'done': self.done,
             'bucketlist_id': self.bucketlist_id,
             'priority': self.priority
         }
+
+    def update_from_json(self, json):
+        """
+        Updates an existing Item with properties defined in the JSON file
+        passed
+
+        :return: instance of Item
+        """
+        if not json:
+            raise ValidationError("invalid request: no JSON data has been"
+                                  "provided.")
+        if 'name' in json:
+            if json['name']:
+                self.name = json['name']
+            else:
+                raise ValidationError('invalid request: name cannot be empty')
+        if 'done' in json:
+            if json['done']:
+                self.name = json['done']
+            else:
+                raise ValidationError('invalid request: done cannot be empty')
+        if 'priority' in json:
+            if json['priority']:
+                self.name = json['priority']
+            else:
+                raise ValidationError(
+                    'invalid request: priority cannot be empty')
+        self.date_modified = datetime.datetime.now()
+        return self
 
     def from_json(self, json):
         """
@@ -181,7 +211,8 @@ class Item(db.Model):
                     raise ValidationError("invalid request: priority cannot be "
                                           "empty")
         except KeyError:
-            raise ValidationError("invalid request: Item name must be provided")
+            raise ValidationError(
+                "invalid request: Item name must be provided")
         self.date_created = datetime.datetime.now()
         return self
 

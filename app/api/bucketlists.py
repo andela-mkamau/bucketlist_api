@@ -74,3 +74,21 @@ def create_item(bucketlist_id):
 @auth.login_required
 def get_item(item_id):
     return Item.query.get_or_404(item_id)
+
+
+@api.route('/bucketlists/<int:bucketlist_id>/items/<int:item_id>',
+           methods=['PUT'])
+@json
+@auth.login_required
+def edit_item(bucketlist_id, item_id):
+    """
+    Updates an existing Item in an existing Bucketlist
+
+    :return: JSON Response
+    """
+    item = Item.query.filter_by(
+        id=item_id, bucketlist_id=bucketlist_id).first()
+    item = item.update_from_json(request.json)
+    db.session.add(item)
+    db.session.commit()
+    return {}, 200, {'Location': item.get_url()}
