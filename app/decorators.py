@@ -1,8 +1,70 @@
+# Inspired by the works of:
+# https://github.com/miguelgrinberg/api-pycon2014
+
 import functools
 
-from app.errors import unauthorized, not_found
-from flask import jsonify, Response, abort
+from flask import jsonify, Response
+from flask import request, url_for
 
+from app.errors import unauthorized
+from app.models import Bucketlist
+
+
+def paginate(max_per_page=20):
+    """
+    Decorator to paginate the result of a query
+    """
+
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapped(*args, **kwargs):
+            # Default items per page is 20, max is 100
+            per_page = min(request.args.get('limit', 20, type=int), 100)
+            page = request.args.get('page', 1, type=int)
+            query = func(*args, **kwargs)
+            if 'q' in request.args:
+                query = query.filter(Bucketlist.name.like('%' +
+                                                          request.args['q']
+                                                          + '%'))
+            result_pages = query.paginate(page, per_page)
+            pages_meta = {
+                'page': page, 'per_page': per_page,
+                'total': result_pages.total,
+                'pages': result_pages.pages
+            }
+            if result_pages.has_prev:
+                pages_meta['prev'] = url_for(request.endpoint,
+                                             page=result_pages.prev_num,
+                                             limit=per_page,
+                                             _external=True, **kwargs)
+            else:
+                pages_meta['prev'] = None
+
+            if result_pages.has_next:
+                pages_meta['next'] = url_for(request.endpoint,
+                                             page=result_pages.next_num,
+                                             limit=per_page,
+                                             _external=True, **kwargs)
+            else:
+                pages_meta['next'] = None
+
+            pages_meta['first'] = url_for(request.endpoint,
+                                          page=1,
+                                          limit=per_page,
+                                          _external=True, **kwargs)
+            pages_meta['last'] = url_for(request.endpoint,
+                                         page=result_pages.pages,
+                                         limit=per_page,
+                                         _external=True, **kwargs)
+            return jsonify({
+                'data': [item.to_json() for item in result_pages.items],
+                'urls': [item.get_url() for item in result_pages.items],
+                'meta': pages_meta
+            })
+
+        return wrapped
+
+    return decorator
 
 
 def json(func):
