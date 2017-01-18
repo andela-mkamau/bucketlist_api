@@ -105,6 +105,7 @@ class Bucketlist(db.Model):
             self.description = json['description']
         else:
             raise ValidationError('invalid request')
+        self.date_modified = datetime.datetime.now()
         return self
 
     def get_url(self):
@@ -133,6 +134,56 @@ class Item(db.Model):
     done = db.Column(db.Boolean, default=False)
     priority = db.Column(db.String(100))
     bucketlist_id = db.Column(db.Integer, db.ForeignKey('bucketlists.id'))
+
+    def get_url(self):
+        """
+        Returns the full URL of this Item object.
+        """
+        return url_for('api.get_item', item_id=self.id, _external=True)
+
+    def to_json(self):
+        return {
+            'id': self.id,
+            'name':self.name,
+            'date_created': self.date_created,
+            'date_modified': self.date_modified,
+            'done': self.done,
+            'bucketlist_id': self.bucketlist_id,
+            'priority': self.priority
+        }
+
+    def from_json(self, json):
+        """
+        Constructs an Item object with properties in the JSON object passed.
+
+        :param json: JSON object with Item properties
+        :return: an Item instance
+        """
+        if not json:
+            raise ValidationError("invalid request: no JSON data has been "
+                                  "provided to construct Item")
+        try:
+            self.name = json['name']
+            if not self.name:
+                raise ValidationError('invalid request: Item name cannot be '
+                                      'empty.')
+
+            if 'done' in json:
+                if json['done']:
+                    self.done = json['done']
+                else:
+                    raise ValidationError("invalid request: done cannot be "
+                                          "empty")
+            if 'priority' in json:
+                if json['priority']:
+                    self.priority = json['priority']
+                else:
+                    raise ValidationError("invalid request: priority cannot be "
+                                          "empty")
+        except KeyError:
+            raise ValidationError("invalid request: Item name must be provided")
+        self.date_created = datetime.datetime.now()
+        return self
 
     def __repr__(self):
         return "Item: {}".format(self.name)
