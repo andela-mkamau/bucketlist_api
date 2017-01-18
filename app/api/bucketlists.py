@@ -103,7 +103,8 @@ def delete_item(bucketlist_id, item_id):
 
     :return: Response with status code 200 if successful, else JSON error
     """
-    item = Item.query.filter_by(id=item_id, bucketlist_id=bucketlist_id).first()
+    item = Item.query.filter_by(id=item_id,
+                                bucketlist_id=bucketlist_id).first_or_404()
     db.session.delete(item)
     db.session.commit()
     return {}, 200

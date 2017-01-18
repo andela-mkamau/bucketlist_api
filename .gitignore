@@ -1,6 +1,7 @@
 .idea/
 __pycache__/
 *$py.class
+*.pyc
 
 # Unit test / coverage reports
 htmlcov/
