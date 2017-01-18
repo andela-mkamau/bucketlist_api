@@ -61,6 +61,6 @@ class BucketListAPITestCase(BaseTestCase):
                                               'name': 'go home today',
                                               'priority': 'high'
                                           }, auth=True)
-        self.assertTrue(response.status_code, 201)
+        self.assertEqual(response.status_code, 201)
         self.assertIsNotNone(response.headers.get('Location'))
 
