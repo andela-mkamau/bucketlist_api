@@ -85,3 +85,16 @@ class BucketListAPITestCase(BaseTestCase):
             '/api/bucketlists/1/items/1', auth=True)
         self.assertEqual(response.status_code, 200)
 
+    def test_searches_bucketlist_by_name(self):
+        """
+        Should be able to do a fulltext search of Bucketlist using name
+        """
+        b_lists = [Bucketlist(name=n) for n in ['my blist1', 'my blist2',
+                                                'your blist3',
+                                                'other blists']]
+        db.session.add_all(b_lists)
+        db.session.commit()
+        response, json = self.client.get('api/bucketlists/?q=my', auth=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(json['data'], [b.to_json() for b in b_lists[:2]])
+
