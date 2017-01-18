@@ -64,3 +64,16 @@ class BucketListAPITestCase(BaseTestCase):
         self.assertEqual(response.status_code, 201)
         self.assertIsNotNone(response.headers.get('Location'))
 
+    def test_updates_item_in_a_bucketlist(self):
+        """
+        Should be able to update an existing Item in a Bucketlist
+        """
+        response, json = self.client.put('/api/bucketlists/1/items/1',
+                                         auth=True, data={
+                                             'name': 'updated item',
+                                             'done': 'true',
+                                             'priority': 'very high'
+                                         })
+        self.assertTrue(response.status_code, 200)
+        self.assertIsNotNone(response.headers.get('Location'))
+
