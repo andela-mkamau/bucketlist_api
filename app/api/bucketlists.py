@@ -3,7 +3,7 @@ from flask import request
 from app import db
 from app.api import api
 from app.auth import auth
-from app.decorators import json
+from app.decorators import json, paginate
 from app.models import Bucketlist, Item
 
 
@@ -13,6 +13,11 @@ from app.models import Bucketlist, Item
 def get_bucketlist(bucketlist_id):
     return Bucketlist.query.get_or_404(bucketlist_id)
 
+@api.route('/bucketlists/', methods=['GET'])
+@paginate()
+@auth.login_required
+def get_all_bucketlists():
+    return Bucketlist.query
 
 @api.route('/bucketlists/', methods=['POST'])
 @json
