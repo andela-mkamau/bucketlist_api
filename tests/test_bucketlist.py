@@ -52,3 +52,15 @@ class BucketListAPITestCase(BaseTestCase):
         response, json = self.client.delete('/api/bucketlists/1', auth=True)
         self.assertEqual(response.status_code, 200)
 
+    def test_creates_new_item_in_bucketlist(self):
+        """
+        Should be able to create a new Item in a Bucketlist
+        """
+        response, json = self.client.post('/api/bucketlists/1/items/',
+                                          data={
+                                              'name': 'go home today',
+                                              'priority': 'high'
+                                          }, auth=True)
+        self.assertTrue(response.status_code, 201)
+        self.assertIsNotNone(response.headers.get('Location'))
+
