@@ -1,10 +1,14 @@
 import datetime
 
-from flask import url_for
+from flask import url_for, current_app, g
 from werkzeug.security import generate_password_hash, check_password_hash
+from itsdangerous import (
+    TimedJSONWebSignatureSerializer as Serializer,
+    BadSignature, SignatureExpired
+)
 
 from app import db
-from app.errors import ValidationError
+from app.errors import ValidationError, bad_request
 
 
 class User(db.Model):
@@ -39,6 +43,9 @@ class User(db.Model):
         :param json: Parameters, in JSON Format, to create User object
         :return: an instance of User object
         """
+        if not json:
+            raise ValidationError('invalid request: no body provided in '
+                                  'request')
         try:
             self.username = json['username']
             self.password = json['password']
@@ -55,8 +62,50 @@ class User(db.Model):
                 "you must provide both username and password")
         return self
 
+    def from_login_json(self, json):
+        if not json:
+            raise ValidationError('no body provided in '
+                                  'request')
+            # return bad_request('no body provided in request')
+        try:
+            username = json['username']
+            password = json['password']
+        except KeyError:
+            raise ValidationError(
+                "you must provide both username and password")
+        if not json['username']:
+            raise ValidationError("username cannot be empty")
+        if not json['password']:
+            raise ValidationError("password cannot be empty")
+        user = User.query.filter_by(username=json['username']).first()
+        if not user:
+            raise ValidationError("authentication error: User does not exist")
+        return user
+
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+    def generate_auth_token(self, expires_in=3600):
+        s = Serializer(current_app.config['SECRET_KEY'], expires_in=expires_in)
+        return s.dumps({'id': self.id})
+
+    @staticmethod
+    def verify_auth_token(token):
+        """
+        Verifies the authentication token that the User provides
+
+        :param token: token string
+        :return: authenticated User instance if successful
+        """
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            credentials = s.loads(token)
+        except SignatureExpired:
+            raise ValidationError("authentication error: token has expired")
+        except BadSignature:
+            raise ValidationError("authentication error: token is invalid")
+        user = User.query.get(credentials['id'])
+        return user
 
     def __repr__(self):
         return "User: {}".format(self.username)
@@ -84,17 +133,15 @@ class Bucketlist(db.Model):
             raise ValidationError("invalid request")
         try:
             self.name = json['name']
-            self.user_id = json['user_id']
 
             if not self.name:
                 raise ValidationError('bucketlist name cannot be empty')
-            if not self.name or not isinstance(self.user_id, int):
-                raise ValidationError('user_id is invalid')
 
             if 'description' in json and json['description']:
                 self.description = json['description']
         except KeyError:
-            raise ValidationError('name and user_id must both be provided')
+            raise ValidationError('name must both be provided')
+        self.user_id = g.user.id
         return self
 
     def update_from_json(self, json):
