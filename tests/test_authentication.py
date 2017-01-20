@@ -38,6 +38,32 @@ class UserAuthenticationTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(json['message'], 'user authenticated')
 
+    def test_returns_error_response_for_bad_login(self):
+        """
+        Should return an error response for bad authentication
+        """
+        # No body in request
+        response, json = self.client.post('/api/auth/login')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(json['message'], 'no body provided in request')
+
+        # No password in request
+        response, json = self.client.post('/api/auth/login', data={
+            "username": "me"
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(json['message'], "you must provide both username and "
+                                          "password")
+
+        # Wrong credentials
+        response, json = self.client.post('/api/auth/login', data={
+            "username": "me",
+            "password": "my password"
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(json['message'], "authentication error: User does"
+                                          " not exist")
+
 
 if __name__ == '__main__':
     unittest.main()
