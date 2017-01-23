@@ -1,6 +1,7 @@
 class Config:
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     SQLALCHEMY_TRACK_MODIFICATIONS = True
+    SECRET_KEY = 'secret key'
 
     @staticmethod
     def init_app(app):
@@ -15,7 +16,7 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'postgresql://user@localhost/bucketlist_test'
-
+    SECRET_KEY = 'test secret key'
 
 class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'postgresql://user@localhost/bucketlist_prod'
