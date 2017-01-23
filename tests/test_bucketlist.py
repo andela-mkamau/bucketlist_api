@@ -1,5 +1,7 @@
 import json
 
+import datetime
+
 from app import db
 from app.models import User, Bucketlist, Item
 from tests.basetest import BaseTestCase
@@ -29,6 +31,12 @@ class BucketListAPITestCase(BaseTestCase):
 
         db.session.add_all((bucketlist, item))
         db.session.commit()
+
+    def test_get_bucketlist(self):
+        response = self.client.get('/api/bucketlists/1',
+                                   headers=self.get_headers(self.valid_token))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(1, json.loads(response.get_data(as_text=True))['id'])
 
     def test_create_bucketlist(self):
         """
@@ -153,8 +161,8 @@ class BucketListAPITestCase(BaseTestCase):
         db.session.add_all(b_lists)
         db.session.commit()
         response = self.client.get('api/bucketlists/?q=my',
-                                         headers=self.get_headers(
-                                             self.valid_token))
+                                   headers=self.get_headers(
+                                       self.valid_token))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(json.loads(response.get_data(as_text=True))['data'],
                          [b.to_json() for b in b_lists[:2]])
