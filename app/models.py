@@ -8,7 +8,7 @@ from itsdangerous import (
 )
 
 from app import db
-from app.errors import ValidationError, bad_request
+from app.errors import ValidationError, ConflictError
 
 
 class User(db.Model):
@@ -56,7 +56,7 @@ class User(db.Model):
                 raise ValidationError("password cannot be empty")
 
             if User.query.filter_by(username=self.username).first() is not None:
-                raise ValidationError("username is taken")
+                raise ConflictError("user already exists")
         except KeyError as e:
             raise ValidationError(
                 "you must provide both username and password")
@@ -130,7 +130,7 @@ class Bucketlist(db.Model):
 
     def from_json(self, json):
         if not json:
-            raise ValidationError("invalid request")
+            raise ValidationError("invalid request: no data provided")
         try:
             self.name = json['name']
 
