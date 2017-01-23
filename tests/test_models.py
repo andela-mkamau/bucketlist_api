@@ -1,4 +1,7 @@
 import unittest
+import time
+
+from app.errors import ValidationError
 
 from app import db
 from app.models import User
@@ -43,9 +46,20 @@ class UserModelTestCase(BaseTestCase):
 
     def test_verifies_token(self):
         token = self.mike.generate_auth_token()
-        id = self.mike.verify_auth_token(token).id
+        id = User.verify_auth_token(token).id
         self.assertEqual(id, 1)
 
+    def test_bad_token(self):
+        good_token = self.mike.generate_auth_token()
+        bad_token = good_token + b'bad token'
+        expired_token = self.mike.generate_auth_token(1)
+
+        with self.assertRaises(ValidationError):
+            User.verify_auth_token(bad_token)
+
+        time.sleep(1.2)
+        with self.assertRaises(ValidationError):
+            User.verify_auth_token(expired_token)
 
 if __name__ == '__main__':
     unittest.main()
