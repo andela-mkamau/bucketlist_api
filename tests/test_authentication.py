@@ -32,6 +32,20 @@ class UserAuthenticationTestCase(BaseTestCase):
         self.assertEqual(
             json.loads(response.get_data(as_text=True))['username'], 'mary')
 
+    def test_register_duplicate_user(self):
+        """
+        Should return an error response for duplicate registration of users
+        """
+        response = self.client.post('/api/auth/register',
+                                    data=json.dumps({
+                                        'username': 'mike',
+                                        'password': 'secret'}),
+                                    headers=self.get_headers())
+        self.assertEqual(response.status_code, 409)
+        self.assertEqual(
+            json.loads(response.get_data(as_text=True))['message'],
+            'user already exists')
+
     def test_log_in_user_with_password(self):
         """
         Should be able to log in a  User using username-password credentials
