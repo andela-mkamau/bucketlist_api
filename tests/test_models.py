@@ -1,5 +1,6 @@
 from tests.basetest import BaseTestCase
 from app.models import User
+from app import db
 
 import unittest
 
@@ -32,6 +33,13 @@ class UserModelTestCase(BaseTestCase):
         """
         self.assertTrue(self.mike.verify_password('secret'))
         self.assertFalse(self.mike.verify_password('newpassword'))
+
+    def test_generate_token(self):
+        db.session.add(self.mike)
+        db.session.commit()
+
+        token = self.mike.generate_auth_token()
+        self.assertIsNotNone(token)
 
 
 if __name__ == '__main__':
