@@ -12,7 +12,7 @@ class UserModelTestCase(BaseTestCase):
         super().setUp()
         self.mike = User(username='mike', password='secret')
 
-    def test_reading_password_property_raises_exception(self):
+    def test_password_is_write_only(self):
         """
         Reading the password property should raise an AttributeError exception
         because it is a write-only property
@@ -20,13 +20,13 @@ class UserModelTestCase(BaseTestCase):
         with self.assertRaises(AttributeError):
             mike_password = self.mike.password
 
-    def test_generates_password_hash(self):
+    def test_generate_password_hash(self):
         """
         Given a password, the User model should create a hashed password
         """
         self.assertIsNotNone(self.mike.password_hash)
 
-    def test_verifies_password(self):
+    def test_verify_password(self):
         """
         A User should be able to verify their own password
         """
