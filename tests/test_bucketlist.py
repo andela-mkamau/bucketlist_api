@@ -1,7 +1,5 @@
 import json
 
-import datetime
-
 from app import db
 from app.models import User, Bucketlist, Item
 from tests.basetest import BaseTestCase
@@ -83,6 +81,30 @@ class BucketListAPITestCase(BaseTestCase):
                                    headers=self.get_headers(self.valid_token))
         self.assertEqual(response.status_code, 200)
         self.assertIsNotNone(response.headers.get('Location'))
+
+    def test_edit_bucketlist_with_invalid_data(self):
+        # empty name
+        response = self.client.put('/api/bucketlists/1',
+                                   data=json.dumps({
+                                       'name': ''
+                                   }),
+                                   headers=self.get_headers(self.valid_token))
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual('bucketlist name cannot be empty', json.loads(
+            response.get_data(as_text=True))['message'])
+
+        # invalid body
+        response = self.client.put('/api/bucketlists/1',
+                                   data=json.dumps({
+                                       'name': 'bucketlist',
+                                       'jhshdj': 'sdsd',
+                                       'sdhhjhf': 432423
+                                   }),
+                                   headers=self.get_headers(self.valid_token))
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual('only name and/or description can be updated',
+                         json.loads(
+                             response.get_data(as_text=True))['message'])
 
     def test_delete_bucketlist(self):
         """
