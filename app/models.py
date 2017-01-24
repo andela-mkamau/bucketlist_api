@@ -1,11 +1,11 @@
 import datetime
 
 from flask import url_for, current_app, g
-from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import (
     TimedJSONWebSignatureSerializer as Serializer,
     BadSignature, SignatureExpired
 )
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db
 from app.errors import ValidationError, ConflictError
@@ -162,7 +162,13 @@ class Bucketlist(db.Model):
 
     def to_json(self):
         return {
-            'name': self.name
+            'id' : self.id,
+            'name': self.name,
+            'description': self.description,
+            'date_created': self.date_created,
+            'date_modified': self.date_modified,
+            'created_by': self.user_id,
+            'items': [item.get_url() for item in self.items]
         }
 
     def __repr__(self):
