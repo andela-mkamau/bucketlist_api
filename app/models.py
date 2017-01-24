@@ -128,9 +128,19 @@ class Bucketlist(db.Model):
     items = db.relationship('Item', backref='bucketlist', lazy='dynamic',
                             cascade='all, delete-orphan')
 
+    def validate_json_keys(self, json):
+        if len(json.keys()) > 2:
+            return False
+        if len(json.keys()) == 2:
+            return 'name' in json.keys() and 'description' in json.keys()
+        else:
+            return 'name' in json.keys() or 'description' in json.keys()
+
     def from_json(self, json):
         if not json:
             raise ValidationError("invalid request: no data provided")
+        if not self.validate_json_keys(json):
+            raise ValidationError('only name and/or description can be in body')
         try:
             self.name = json['name']
 
@@ -146,13 +156,18 @@ class Bucketlist(db.Model):
 
     def update_from_json(self, json):
         if not json:
-            raise ValidationError('invalid request')
-        elif 'name' in json and json['name']:
-            self.name = json['name']
+            raise ValidationError('request cannot be empty')
+        elif not self.validate_json_keys(json):
+            raise ValidationError('only name and/or description can be updated')
+        elif 'name' in json:
+            if json['name']:
+                self.name = json['name']
+            else:
+                raise ValidationError('bucketlist name cannot be empty')
         elif 'description' in json and json['description']:
             self.description = json['description']
         else:
-            raise ValidationError('invalid request')
+            raise ValidationError('invalid body in request')
         self.date_modified = datetime.datetime.now()
         return self
 
