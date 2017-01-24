@@ -124,6 +124,7 @@ class BucketListAPITestCase(BaseTestCase):
         response = self.client.delete('/api/bucketlists/1', headers=
         self.get_headers(self.valid_token))
         self.assertEqual(response.status_code, 200)
+        self.assertIsNone(Bucketlist.query.get(1))
 
     def test_delete_non_existent_bucketlist(self):
         """
