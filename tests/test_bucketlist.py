@@ -69,6 +69,17 @@ class BucketListAPITestCase(BaseTestCase):
         self.assertEqual('bucketlist name cannot be empty', json.loads(
             response.get_data(as_text=True))['message'])
 
+        # invalid body
+        response = self.client.post('/api/bucketlists/',
+                                    headers=self.get_headers(self.valid_token),
+                                    data=json.dumps({'name': 'jjshds',
+                                                     'ghgsd':'ggshdgs',
+                                                     'description': 'df'
+                                                     }))
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual('only name and/or description can be in body', json.loads(
+            response.get_data(as_text=True))['message'])
+
     def test_edit_bucketlist(self):
         """
         Should be able to edit an existing Bucketlist
