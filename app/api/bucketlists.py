@@ -53,7 +53,7 @@ def delete_bucketlist(bucketlist_id):
     bucketlist = Bucketlist.query.get_or_404(bucketlist_id)
     db.session.delete(bucketlist)
     db.session.commit()
-    return {}, 200
+    return {}, 204
 
 
 @api.route('/bucketlists/<int:bucketlist_id>/items/', methods=['POST'])
@@ -92,7 +92,7 @@ def edit_item(bucketlist_id, item_id):
     :return: JSON Response
     """
     item = Item.query.filter_by(
-        id=item_id, bucketlist_id=bucketlist_id).first()
+        id=item_id, bucketlist_id=bucketlist_id).first_or_404()
     item = item.update_from_json(request.json)
     db.session.add(item)
     db.session.commit()
@@ -112,4 +112,4 @@ def delete_item(bucketlist_id, item_id):
                                 bucketlist_id=bucketlist_id).first_or_404()
     db.session.delete(item)
     db.session.commit()
-    return {}, 200
+    return {}, 204
