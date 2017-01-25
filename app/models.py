@@ -55,7 +55,8 @@ class User(db.Model):
             if not json['password']:
                 raise ValidationError("password cannot be empty")
 
-            if User.query.filter_by(username=self.username).first() is not None:
+            if User.query.filter_by(
+                    username=self.username).first() is not None:
                 raise ConflictError("user already exists")
         except KeyError as e:
             raise ValidationError(
@@ -140,7 +141,8 @@ class Bucketlist(db.Model):
         if not json:
             raise ValidationError("invalid request: no data provided")
         if not self.validate_json_keys(json):
-            raise ValidationError('only name and/or description can be in body')
+            raise ValidationError(
+                'only name and/or description can be in body')
         try:
             self.name = json['name']
 
@@ -158,7 +160,8 @@ class Bucketlist(db.Model):
         if not json:
             raise ValidationError('request cannot be empty')
         elif not self.validate_json_keys(json):
-            raise ValidationError('only name and/or description can be updated')
+            raise ValidationError(
+                'only name and/or description can be updated')
         elif 'name' in json:
             if json['name']:
                 self.name = json['name']
@@ -177,7 +180,7 @@ class Bucketlist(db.Model):
 
     def to_json(self):
         return {
-            'id' : self.id,
+            'id': self.id,
             'name': self.name,
             'description': self.description,
             'date_created': self.date_created,
@@ -203,6 +206,20 @@ class Item(db.Model):
     done = db.Column(db.Boolean, default=False)
     priority = db.Column(db.String(100))
     bucketlist_id = db.Column(db.Integer, db.ForeignKey('bucketlists.id'))
+
+    def validate_json_keys(self, json):
+        """
+        Helper method to check that the request body JSON has valid keys
+
+        :return: True if JSON had valid keys; else False
+        """
+        if len(json.keys()) > 3:
+            return False
+        if len(json.keys()) == 3:
+            return 'name' in json.keys() and 'done' in json.keys() and \
+                   'priority' in json.keys()
+        else:
+            return all([key in ('name', 'done', 'priority') for key in json.keys()])
 
     def get_url(self):
         """
@@ -231,16 +248,20 @@ class Item(db.Model):
         if not json:
             raise ValidationError("invalid request: no JSON data has been"
                                   "provided.")
+        if not self.validate_json_keys(json):
+            raise ValidationError("only name and/or done and/or priority can "
+                                  "be in request body")
         if 'name' in json:
             if json['name']:
                 self.name = json['name']
             else:
                 raise ValidationError('invalid request: name cannot be empty')
         if 'done' in json:
-            if json['done']:
+            if json['done'] and json['done'] in ('true', 'false'):
                 self.name = json['done']
             else:
-                raise ValidationError('invalid request: done cannot be empty')
+                raise ValidationError(
+                    'invalid request: done can only be true or false')
         if 'priority' in json:
             if json['priority']:
                 self.name = json['priority']
@@ -276,8 +297,9 @@ class Item(db.Model):
                 if json['priority']:
                     self.priority = json['priority']
                 else:
-                    raise ValidationError("invalid request: priority cannot be "
-                                          "empty")
+                    raise ValidationError(
+                        "invalid request: priority cannot be "
+                        "empty")
         except KeyError:
             raise ValidationError(
                 "invalid request: Item name must be provided")
