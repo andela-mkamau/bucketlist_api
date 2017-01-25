@@ -6,7 +6,7 @@ import functools
 from flask import jsonify, Response
 from flask import request, url_for
 
-from app.errors import unauthorized
+from app.errors import unauthorized, bad_request
 from app.models import Bucketlist
 
 
@@ -19,9 +19,15 @@ def paginate(max_per_page=20):
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
             # Default items per page is 20, max is 100
-            per_page = min(request.args.get('limit', 20, type=int), 100)
+            #per_page = min(request.args.get('limit', 20, type=int), 100)
             page = request.args.get('page', 1, type=int)
             query = func(*args, **kwargs)
+            if not request.args:
+                return jsonify([blist.to_json() for blist in query.all()])
+            if not all([key in ('q', 'limit') for key in request.args.keys()]):
+                return bad_request('unknown arguments in request')
+            if 'limit' in request.args:
+                per_page = min(request.args.get('limit', 20, type=int), 100)
             if 'q' in request.args:
                 query = query.filter(Bucketlist.name.like('%' +
                                                           request.args['q']
