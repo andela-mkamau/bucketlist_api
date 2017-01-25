@@ -124,7 +124,7 @@ class BucketListAPITestCase(BaseTestCase):
         """
         response = self.client.delete('/api/bucketlists/1', headers=
         self.get_headers(self.valid_token))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
         self.assertIsNone(Bucketlist.query.get(1))
 
     def test_delete_non_existent_bucketlist(self):
@@ -234,7 +234,8 @@ class BucketListAPITestCase(BaseTestCase):
         response = self.client.delete('/api/bucketlists/1/items/1',
                                       headers=self.get_headers(
                                           self.valid_token))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
+        self.assertIsNone(Item.query.get(1))
 
     def test_search_bucketlist_by_name(self):
         """
@@ -249,5 +250,7 @@ class BucketListAPITestCase(BaseTestCase):
                                    headers=self.get_headers(
                                        self.valid_token))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(json.loads(response.get_data(as_text=True))['data'],
-                         [b.to_json() for b in b_lists[:2]])
+        b_names = [b['name'] for b in json.loads(response.get_data(as_text=True))[
+                'data']]
+        self.assertListEqual( b_names,
+            [b.to_json()['name'] for b in b_lists[:2]])
