@@ -73,12 +73,13 @@ class BucketListAPITestCase(BaseTestCase):
         response = self.client.post('/api/bucketlists/',
                                     headers=self.get_headers(self.valid_token),
                                     data=json.dumps({'name': 'jjshds',
-                                                     'ghgsd':'ggshdgs',
+                                                     'ghgsd': 'ggshdgs',
                                                      'description': 'df'
                                                      }))
         self.assertEqual(response.status_code, 400)
-        self.assertEqual('only name and/or description can be in body', json.loads(
-            response.get_data(as_text=True))['message'])
+        self.assertEqual('only name and/or description can be in body',
+                         json.loads(
+                             response.get_data(as_text=True))['message'])
 
     def test_edit_bucketlist(self):
         """
@@ -175,6 +176,56 @@ class BucketListAPITestCase(BaseTestCase):
                                    headers=self.get_headers(self.valid_token))
         self.assertTrue(response.status_code, 200)
         self.assertIsNotNone(response.headers.get('Location'))
+
+    def test_update_item_with_invalid_data(self):
+        # empty parameters
+        response = self.client.put('/api/bucketlists/1/items/1',
+                                   data=json.dumps({
+                                       'name': '',
+                                       'done': 'true',
+                                       'priority': 'very high'
+                                   }),
+                                   headers=self.get_headers(self.valid_token))
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            json.loads(response.get_data(as_text=True))['message'],
+            'invalid request: name cannot be empty'
+        )
+
+        # invalid done
+        response = self.client.put('/api/bucketlists/1/items/1',
+                                   data=json.dumps({'done': 'to be done'}),
+                                   headers=self.get_headers(self.valid_token))
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            json.loads(response.get_data(as_text=True))['message'],
+            'invalid request: done can only be true or false'
+        )
+
+        # invalid params
+        response = self.client.put('/api/bucketlists/1/items/1',
+                                   data=json.dumps({
+                                       'done': 'false',
+                                       'jhjsdf': 45344
+                                   }),
+                                   headers=self.get_headers(self.valid_token))
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            json.loads(response.get_data(as_text=True))['message'],
+            'only name and/or done and/or priority can be in request body'
+        )
+
+        # empty priority
+        response = self.client.put('/api/bucketlists/1/items/1',
+                                   data=json.dumps({
+                                       'priority': ''
+                                   }),
+                                   headers=self.get_headers(self.valid_token))
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            json.loads(response.get_data(as_text=True))['message'],
+            'invalid request: priority cannot be empty'
+        )
 
     def test_delete_item_in_bucketlist(self):
         """
