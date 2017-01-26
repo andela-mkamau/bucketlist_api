@@ -53,7 +53,7 @@ class UserModelTestCase(BaseTestCase):
         user = User.query.get(1)
         good_token = user.generate_auth_token()
         bad_token = good_token + b'bad token'
-        expired_token = user.generate_auth_token(1)
+        expired_token = user.generate_auth_token(0.5)
 
         with self.assertRaises(UnauthorizedError):
             user.verify_auth_token(bad_token)
