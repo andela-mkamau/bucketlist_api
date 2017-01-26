@@ -67,7 +67,7 @@ class UserAuthenticationTestCase(BaseTestCase):
         # No body in request
         response = self.client.post('/api/auth/login', data=json.dumps({}),
                                     headers=self.get_headers())
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 401)
         self.assertEqual(
             json.loads(response.get_data(as_text=True))['message'],
             'no body provided in request')
@@ -76,7 +76,7 @@ class UserAuthenticationTestCase(BaseTestCase):
         response = self.client.post('/api/auth/login', data=json.dumps({
             "username": "me"
         }), headers=self.get_headers())
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 401)
         self.assertEqual(
             json.loads(response.get_data(as_text=True))['message'],
             "you must provide both username and password")
@@ -86,7 +86,7 @@ class UserAuthenticationTestCase(BaseTestCase):
             "username": "me",
             "password": "my password"
         }), headers=self.get_headers())
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 401)
         self.assertEqual(
             json.loads(response.get_data(as_text=True))['message'],
             "authentication error: User does not exist")
