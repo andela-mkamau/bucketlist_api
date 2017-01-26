@@ -50,16 +50,17 @@ class UserModelTestCase(BaseTestCase):
         self.assertEqual(id, 1)
 
     def test_bad_token(self):
-        good_token = self.mike.generate_auth_token()
+        user = User.query.get(1)
+        good_token = user.generate_auth_token()
         bad_token = good_token + b'bad token'
-        expired_token = self.mike.generate_auth_token(1)
+        expired_token = user.generate_auth_token(1)
 
         with self.assertRaises(UnauthorizedError):
-            User.verify_auth_token(bad_token)
+            user.verify_auth_token(bad_token)
 
         time.sleep(1.2)
         with self.assertRaises(UnauthorizedError):
-            User.verify_auth_token(expired_token)
+            user.verify_auth_token(expired_token)
 
 if __name__ == '__main__':
     unittest.main()
