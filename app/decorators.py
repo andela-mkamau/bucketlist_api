@@ -26,8 +26,7 @@ def paginate(max_per_page=20):
                 return jsonify([blist.to_json() for blist in query.all()])
             if not all([key in ('q', 'limit') for key in request.args.keys()]):
                 return bad_request('unknown arguments in request')
-            if 'limit' in request.args:
-                per_page = min(request.args.get('limit', 20, type=int), 100)
+            per_page = min(request.args.get('limit', 20, type=int), 100)
             if 'q' in request.args:
                 query = query.filter(Bucketlist.name.like('%' +
                                                           request.args['q']
