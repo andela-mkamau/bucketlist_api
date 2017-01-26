@@ -1,6 +1,7 @@
 from flask_script import Manager, Shell
 from flask_migrate import Migrate, MigrateCommand
 from ptpython.ipython import embed
+from flask import jsonify
 
 from app import db, create_app
 from app.models import User, Item, Bucketlist
@@ -30,6 +31,14 @@ class PtShell(Shell):
 
 
 manager.add_command('shell', PtShell())
+
+@app.errorhandler(404)
+def not_found(e):
+    return jsonify({"error": "invalid url"}), 404
+
+@app.errorhandler(405)
+def not_allowed(e):
+    return jsonify({'error': 'request method not allowed'}), 405
 
 if __name__ == '__main__':
     manager.run()
