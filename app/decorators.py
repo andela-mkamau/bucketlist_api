@@ -24,7 +24,7 @@ def paginate(max_per_page=20):
             query = func(*args, **kwargs)
             if not request.args:
                 return jsonify([blist.to_json() for blist in query.all()])
-            if not all([key in ('q', 'limit') for key in request.args.keys()]):
+            if not all([key in ('q', 'limit', 'page') for key in request.args.keys()]):
                 return bad_request('unknown arguments in request')
             per_page = min(request.args.get('limit', 20, type=int), 100)
             if 'q' in request.args:
