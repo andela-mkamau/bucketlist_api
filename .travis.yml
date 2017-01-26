@@ -7,6 +7,9 @@ install:
  - pip install -r requirements.txt
  - pip install codacy-coverage
 
+env:
+ - DATABASE_URI_TEST=postgresql://localhost/bucketlist_test
+
 services:
  - postgres
 
