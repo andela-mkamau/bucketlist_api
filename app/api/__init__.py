@@ -1,11 +1,14 @@
 from flask import Blueprint, g
 
 from app.errors import (bad_request, ValidationError, not_found, ConflictError,
-                        conflict)
+                        conflict, unauthorized, UnauthorizedError)
 
 # API Blueprint
 api = Blueprint('api', __name__)
 
+@api.errorhandler(UnauthorizedError)
+def unauthorised_error(e):
+    return unauthorized(e.args[0])
 
 @api.errorhandler(ConflictError)
 def conflict_error(e):

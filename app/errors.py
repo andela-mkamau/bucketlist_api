@@ -3,6 +3,9 @@
 
 from flask import jsonify
 
+class UnauthorizedError(Exception):
+    pass
+
 class ConflictError(ValueError):
     pass
 

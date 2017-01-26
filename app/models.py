@@ -8,7 +8,7 @@ from itsdangerous import (
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db
-from app.errors import ValidationError, ConflictError
+from app.errors import ValidationError, ConflictError, UnauthorizedError
 
 
 class User(db.Model):
@@ -65,22 +65,22 @@ class User(db.Model):
 
     def from_login_json(self, json):
         if not json:
-            raise ValidationError('no body provided in '
+            raise UnauthorizedError('no body provided in '
                                   'request')
             # return bad_request('no body provided in request')
         try:
             username = json['username']
             password = json['password']
         except KeyError:
-            raise ValidationError(
+            raise UnauthorizedError(
                 "you must provide both username and password")
         if not json['username']:
-            raise ValidationError("username cannot be empty")
+            raise UnauthorizedError("username cannot be empty")
         if not json['password']:
-            raise ValidationError("password cannot be empty")
+            raise UnauthorizedError("password cannot be empty")
         user = User.query.filter_by(username=json['username']).first()
         if not user:
-            raise ValidationError("authentication error: User does not exist")
+            raise UnauthorizedError("authentication error: User does not exist")
         return user
 
     def verify_password(self, password):
@@ -102,9 +102,9 @@ class User(db.Model):
         try:
             credentials = s.loads(token)
         except SignatureExpired:
-            raise ValidationError("authentication error: token has expired")
+            raise UnauthorizedError("authentication error: token has expired")
         except BadSignature:
-            raise ValidationError("authentication error: token is invalid")
+            raise UnauthorizedError("authentication error: token is invalid")
         user = User.query.get(credentials['id'])
         return user
 
