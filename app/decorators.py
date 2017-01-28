@@ -96,8 +96,7 @@ def json(func):
             # these are headers, NOT status codes
             headers, status_or_headers = status_or_headers, None
         if isinstance(response, Response):
-            if response.status_code == 401:
-                return unauthorized('you must authenticate to  access API')
+            return response
         if not isinstance(response, dict):
             response = response.to_json()
         response = jsonify(response)
