@@ -1,5 +1,5 @@
 # Users -- as an API resource
-from flask import request
+from flask import request, jsonify
 
 from app import db
 from app.api import api
@@ -8,7 +8,6 @@ from app.models import User
 
 
 @api.route('/auth/register', methods=['POST'])
-@json
 def register_user():
     """
     Registers a new User with data from the POST request
@@ -16,7 +15,11 @@ def register_user():
     user = User().from_json(request.json)
     db.session.add(user)
     db.session.commit()
-    return user, 201
+    return jsonify({
+        'message': user.username.title() + " account created successfully",
+        'username': user.username,
+        'id': user.id
+    }), 201
 
 @api.route('/auth/login', methods=['POST'])
 @json

@@ -169,7 +169,7 @@ class Bucketlist(db.Model):
                 self.name = json['name']
             else:
                 raise ValidationError('bucketlist name cannot be empty')
-        elif 'description' in json and json['description']:
+        elif 'description' in json:
             self.description = json['description']
         else:
             raise ValidationError('invalid body in request')

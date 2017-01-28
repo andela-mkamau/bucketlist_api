@@ -15,11 +15,13 @@ def get_bucketlist(bucketlist_id):
     return Bucketlist.query.filter_by(user_id=g.user.id,
                                       id=bucketlist_id).first_or_404()
 
+
 @api.route('/bucketlists/', methods=['GET'])
 @paginate()
 @auth.login_required
 def get_all_bucketlists():
     return Bucketlist.query.filter_by(user_id=g.user.id)
+
 
 @api.route('/bucketlists/', methods=['POST'])
 @json
@@ -28,7 +30,10 @@ def create_bucketlist():
     bucketlist = Bucketlist().from_json(request.json)
     db.session.add(bucketlist)
     db.session.commit()
-    return {}, 201, {'Location': bucketlist.get_url()}
+    return {
+               'message': 'created bucketlist successfully',
+               'resource url': bucketlist.get_url()
+           }, 201, {'Location': bucketlist.get_url()}
 
 
 @api.route('/bucketlists/<int:bucketlist_id>', methods=['PUT'])
@@ -36,11 +41,14 @@ def create_bucketlist():
 @auth.login_required
 def edit_bucketlist(bucketlist_id):
     bucketlist = Bucketlist.query.filter_by(user_id=g.user.id,
-                                      id=bucketlist_id).first_or_404()
+                                            id=bucketlist_id).first_or_404()
     bucketlist = bucketlist.update_from_json(request.json)
     db.session.add(bucketlist)
     db.session.commit()
-    return {}, 200, {'Location': bucketlist.get_url()}
+    return {
+               'message': 'successfully updated bucketlist',
+               'resource url': bucketlist.get_url()
+           }, 200, {'Location': bucketlist.get_url()}
 
 
 @api.route('/bucketlists/<int:bucketlist_id>', methods=['DELETE'])
@@ -54,7 +62,7 @@ def delete_bucketlist(bucketlist_id):
     :return: Response object with status code 200 if successful, else error
     """
     bucketlist = Bucketlist.query.filter_by(user_id=g.user.id,
-                                      id=bucketlist_id).first_or_404()
+                                            id=bucketlist_id).first_or_404()
     db.session.delete(bucketlist)
     db.session.commit()
     return {}, 204
@@ -71,14 +79,16 @@ def create_item(bucketlist_id):
     :return: Response with code 201 if successful, else error message
     """
     bucketlist = Bucketlist.query.filter_by(user_id=g.user.id,
-                                      id=bucketlist_id).first()
+                                            id=bucketlist_id).first()
     if not bucketlist:
         return not_found("cannot create item in a non-existent bucketlist")
     item = Item().from_json(request.json)
     item.bucketlist = bucketlist
     db.session.add(item)
     db.session.commit()
-    return {}, 201, {'Location': item.get_url()}
+    return {
+               "message": "successfully created item"
+           }, 201, {'Location': item.get_url()}
 
 
 @api.route('/item/<int:item_id>')
@@ -107,7 +117,10 @@ def edit_item(bucketlist_id, item_id):
     item = item.update_from_json(request.json)
     db.session.add(item)
     db.session.commit()
-    return {}, 200, {'Location': item.get_url()}
+    return {
+               "message": "item successfully updated"
+           }, 200, {'Location': item.get_url()}
+
 
 @api.route('/bucketlists/<int:bucketlist_id>/items/<int:item_id>',
            methods=['DELETE'])
@@ -127,4 +140,6 @@ def delete_item(bucketlist_id, item_id):
                                 bucketlist_id=bucketlist_id).first_or_404()
     db.session.delete(item)
     db.session.commit()
-    return {}, 204
+    return {
+               "message": "deleted item successfully"
+           }, 204
