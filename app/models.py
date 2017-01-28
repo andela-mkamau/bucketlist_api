@@ -33,7 +33,8 @@ class User(db.Model):
 
     def to_json(self):
         return {
-            'username': self.username
+            'username': self.username,
+            'id': self.id
         }
 
     def from_json(self, json):
@@ -67,7 +68,6 @@ class User(db.Model):
         if not json:
             raise UnauthorizedError('no body provided in '
                                   'request')
-            # return bad_request('no body provided in request')
         try:
             username = json['username']
             password = json['password']
@@ -78,9 +78,11 @@ class User(db.Model):
             raise UnauthorizedError("username cannot be empty")
         if not json['password']:
             raise UnauthorizedError("password cannot be empty")
-        user = User.query.filter_by(username=json['username']).first()
+        user = User.query.filter_by(username=username).first()
         if not user:
             raise UnauthorizedError("authentication error: User does not exist")
+        if not user.verify_password(password):
+            raise UnauthorizedError("wrong password provided")
         return user
 
     def verify_password(self, password):
