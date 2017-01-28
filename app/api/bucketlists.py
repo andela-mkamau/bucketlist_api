@@ -1,23 +1,25 @@
-from flask import request
+from flask import request, g
 
 from app import db
 from app.api import api
 from app.auth import auth
 from app.decorators import json, paginate
 from app.models import Bucketlist, Item
+from app.errors import not_found
 
 
 @api.route('/bucketlists/<int:bucketlist_id>', methods=['GET'])
 @json
 @auth.login_required
 def get_bucketlist(bucketlist_id):
-    return Bucketlist.query.get_or_404(bucketlist_id)
+    return Bucketlist.query.filter_by(user_id=g.user.id,
+                                      id=bucketlist_id).first_or_404()
 
 @api.route('/bucketlists/', methods=['GET'])
 @paginate()
 @auth.login_required
 def get_all_bucketlists():
-    return Bucketlist.query
+    return Bucketlist.query.filter_by(user_id=g.user.id)
 
 @api.route('/bucketlists/', methods=['POST'])
 @json
@@ -33,7 +35,8 @@ def create_bucketlist():
 @json
 @auth.login_required
 def edit_bucketlist(bucketlist_id):
-    bucketlist = Bucketlist.query.get_or_404(bucketlist_id)
+    bucketlist = Bucketlist.query.filter_by(user_id=g.user.id,
+                                      id=bucketlist_id).first_or_404()
     bucketlist = bucketlist.update_from_json(request.json)
     db.session.add(bucketlist)
     db.session.commit()
@@ -50,7 +53,8 @@ def delete_bucketlist(bucketlist_id):
     :param bucketlist_id: primary key id of the Bucketlist
     :return: Response object with status code 200 if successful, else error
     """
-    bucketlist = Bucketlist.query.get_or_404(bucketlist_id)
+    bucketlist = Bucketlist.query.filter_by(user_id=g.user.id,
+                                      id=bucketlist_id).first_or_404()
     db.session.delete(bucketlist)
     db.session.commit()
     return {}, 204
@@ -66,7 +70,10 @@ def create_item(bucketlist_id):
     :param bucketlist_id: identifies the Bucketlist to create an Item in
     :return: Response with code 201 if successful, else error message
     """
-    bucketlist = Bucketlist.query.get_or_404(bucketlist_id)
+    bucketlist = Bucketlist.query.filter_by(user_id=g.user.id,
+                                      id=bucketlist_id).first()
+    if not bucketlist:
+        return not_found("cannot create item in a non-existent bucketlist")
     item = Item().from_json(request.json)
     item.bucketlist = bucketlist
     db.session.add(item)
@@ -91,6 +98,10 @@ def edit_item(bucketlist_id, item_id):
 
     :return: JSON Response
     """
+    bucketlist = Bucketlist.query.filter_by(user_id=g.user.id,
+                                            id=bucketlist_id).first()
+    if not bucketlist:
+        return not_found("item does not exist")
     item = Item.query.filter_by(
         id=item_id, bucketlist_id=bucketlist_id).first_or_404()
     item = item.update_from_json(request.json)
@@ -108,6 +119,10 @@ def delete_item(bucketlist_id, item_id):
 
     :return: Response with status code 200 if successful, else JSON error
     """
+    bucketlist = Bucketlist.query.filter_by(user_id=g.user.id,
+                                            id=bucketlist_id).first()
+    if not bucketlist:
+        return not_found("item does not exist")
     item = Item.query.filter_by(id=item_id,
                                 bucketlist_id=bucketlist_id).first_or_404()
     db.session.delete(item)
