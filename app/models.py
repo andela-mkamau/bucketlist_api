@@ -67,7 +67,7 @@ class User(db.Model):
     def from_login_json(self, json):
         if not json:
             raise UnauthorizedError('no body provided in '
-                                  'request')
+                                    'request')
         try:
             username = json['username']
             password = json['password']
@@ -80,7 +80,8 @@ class User(db.Model):
             raise UnauthorizedError("password cannot be empty")
         user = User.query.filter_by(username=username).first()
         if not user:
-            raise UnauthorizedError("authentication error: User does not exist")
+            raise UnauthorizedError(
+                "authentication error: User does not exist")
         if not user.verify_password(password):
             raise UnauthorizedError("wrong password provided")
         return user
@@ -260,7 +261,10 @@ class Item(db.Model):
                 raise ValidationError('invalid request: name cannot be empty')
         if 'done' in json:
             if json['done'] and json['done'] in ('true', 'false'):
-                self.name = json['done']
+                if json['done'] == 'true':
+                    self.name = True
+                else:
+                    self.name = False
             else:
                 raise ValidationError(
                     'invalid request: done can only be true or false')
