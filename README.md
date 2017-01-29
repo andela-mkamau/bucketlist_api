@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/andela-mkamau/bucketlist_api.svg?branch=develop)](https://travis-ci.org/andela-mkamau/bucketlist_api)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/7303f0f8dc2a4f7dbdabff2f2dd8f040)](https://www.codacy.com/app/michael-kamau/bucketlist_api?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=andela-mkamau/bucketlist_api&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://api.codacy.com/project/badge/Coverage/7303f0f8dc2a4f7dbdabff2f2dd8f040)](https://www.codacy.com/app/michael-kamau/bucketlist_api?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=andela-mkamau/bucketlist_api&amp;utm_campaign=Badge_Coverage)
 # Bucketlister
 
 ## Introduction
