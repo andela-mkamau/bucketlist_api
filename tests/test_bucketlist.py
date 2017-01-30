@@ -1,4 +1,5 @@
-import json, unittest
+import json
+import unittest
 
 from app import db
 from app.models import User, Bucketlist, Item
@@ -238,6 +239,20 @@ class BucketListAPITestCase(BaseTestCase):
         self.assertEqual(response.status_code, 204)
         self.assertIsNone(Item.query.get(1))
 
+    def test_access_another_user_resource(self):
+        """
+        Accessing another User's resource should return a 404 error response
+        """
+        new_user = User(username="newuser", password="newuser")
+        db.session.add(new_user)
+        db.session.commit()
+        new_user_token = 'Bearer {}'.format(
+            new_user.generate_auth_token().decode('ascii'))
+        print(">>>>>", new_user_token)
+        response = self.client.get('/api/bucketlists/1',
+                                   headers=self.get_headers(new_user_token))
+        self.assertEqual(response.status_code, 404)
+
     @unittest.skip("Fix bug making it fail")
     def test_search_bucketlist_by_name(self):
         """
@@ -252,7 +267,8 @@ class BucketListAPITestCase(BaseTestCase):
                                    headers=self.get_headers(
                                        self.valid_token))
         self.assertEqual(response.status_code, 200)
-        b_names = [b['name'] for b in json.loads(response.get_data(as_text=True))[
-            'data']]
+        b_names = [b['name'] for b in
+                   json.loads(response.get_data(as_text=True))[
+                       'data']]
         self.assertListEqual(b_names,
                              [b.to_json()['name'] for b in b_lists[:2]])
